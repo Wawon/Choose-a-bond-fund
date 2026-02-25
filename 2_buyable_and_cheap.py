@@ -1,3 +1,29 @@
+"""
+可申购低价债券基金筛选程序
+
+功能概述：
+- 对成立超过3年的债券基金进行二次筛选
+- 查询基金的申购状态和购买起点信息
+- 筛选出当前可申购且价格合理的基金
+
+筛选条件：
+1. 申购状态：排除"封闭期"和"暂停申购"的基金
+2. 购买起点：不超过1000元
+3. 数据来源：使用AKShare的fund_purchase_em接口获取实时申购信息
+
+处理流程：
+1. 读取前期筛选出的债券基金代码文件
+2. 获取全市场基金申购状态数据
+3. 并发查询每只基金的具体信息
+4. 应用筛选条件过滤基金
+5. 将筛选结果保存回原文件
+
+技术特点：
+- 使用多线程并发查询提高效率
+- 每15次查询间隔0.15秒避免请求过频
+- 自动处理数据类型转换和异常情况
+"""
+
 import akshare as ak
 import pandas as pd
 import time
@@ -40,7 +66,7 @@ def query_fund_info(code, all_fund_data):
 
 def query_fund_purchase_status():
     # 读取包含基金代码的Excel文件
-    input_file = r"C:\Users\wawon\PycharmProjects\PythonProject1\.venv\大于三年的债券基金代码.xlsx"
+    input_file = r"C:\Users\wawon\PycharmProjects\PythonProject1\.venv\Bond All in One\大于三年的债券基金代码.xlsx"
     try:
         # 读取原文件数据
         df = pd.read_excel(input_file)
