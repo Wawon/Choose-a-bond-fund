@@ -1,3 +1,30 @@
+"""
+债券基金收益率查询程序
+
+功能概述：
+- 查询筛选后债券基金的近期收益率表现
+- 获取每只基金近1年和近3月的收益率数据
+- 将收益率信息整合到基金基础数据中
+
+数据来源：
+- 使用AKShare的fund_individual_achievement_xq接口
+- 获取基金的阶段业绩数据
+
+处理流程：
+1. 读取经过前期筛选的债券基金代码列表
+2. 遍历每只基金代码查询收益率数据
+3. 提取近1年收益率和近3月收益率指标
+4. 处理查询异常和数据缺失情况
+5. 将收益率数据添加到原数据框中
+6. 保存更新后的完整数据到Excel文件
+
+异常处理机制：
+- 网络请求异常的重试机制
+- 数据结构变化的兼容性处理
+- 查询频率控制避免接口限制
+- 备用文件保存机制确保数据不丢失
+"""
+
 import akshare as ak
 import pandas as pd
 import time
@@ -7,7 +34,7 @@ from requests.exceptions import RequestException
 
 def query_fund_returns():
     # 输入文件路径
-    input_file = r"C:\Users\wawon\PycharmProjects\PythonProject1\.venv\大于三年的债券基金代码.xlsx"
+    input_file = r"C:\Users\wawon\PycharmProjects\PythonProject1\.venv\Bond All in One\大于三年的债券基金代码.xlsx"
 
     try:
         # 读取Excel文件
