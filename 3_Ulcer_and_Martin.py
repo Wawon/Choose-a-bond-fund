@@ -1,3 +1,30 @@
+"""
+债券基金风险收益评估程序
+
+功能概述：
+- 计算债券基金的Ulcer指数（痛苦指数）和Martin比率
+- 评估基金在指定时间区间内的风险调整后收益表现
+- 筛选出收益风险比较优的基金产品
+
+核心指标：
+1. Ulcer指数：衡量基金回撤风险的指标，数值越小风险越低
+2. 年化收益率：基金在指定期间的复合年化收益
+3. Martin比率：(年化收益率-无风险利率)/Ulcer指数，衡量风险调整后收益
+
+处理流程：
+1. 读取筛选后的债券基金代码列表
+2. 获取每只基金在指定时间区间的累计净值数据
+3. 并发计算各基金的Ulcer指数和Martin比率
+4. 应用筛选条件：年化收益率3.5%-10% 且 Martin比率≥3.5
+5. 将计算结果与原数据合并后保存
+
+技术特点：
+- 使用多线程并发处理提高计算效率
+- 实现重试机制应对网络不稳定情况
+- 添加随机延迟避免请求过于频繁
+- 自动适配CPU核心数优化线程池大小
+"""
+
 import akshare as ak
 import pandas as pd
 import numpy as np
@@ -121,11 +148,11 @@ if __name__ == "__main__":
     risk_free_rate = 1.5
 
     # 定义目标日期
-    start_date_str = "2022-08-11"
-    end_date_str = "2025-08-11"
+    start_date_str = "2023-02-24"
+    end_date_str = "2026-02-24"
 
     # 读取基金代码文件
-    input_path = r"C:\Users\wawon\PycharmProjects\PythonProject1\.venv\大于三年的债券基金代码.xlsx"
+    input_path = r"C:\Users\wawon\PycharmProjects\PythonProject1\.venv\Bond All in One\大于三年的债券基金代码.xlsx"
     try:
         # 先读取文件获取列名
         temp_df = pd.read_excel(input_path, nrows=0)
@@ -160,9 +187,13 @@ if __name__ == "__main__":
     # 将结果转换为 DataFrame
     results_df = pd.DataFrame(results)
 
-    # 添加筛选逻辑，删除年化收益率小于 2% 或 Martin Ratio 小于 2 的基金
+    # 添加筛选逻辑，只保留年化收益率在3.5%到10%之间且Martin比率≥3.5的基金
     if not results_df.empty:
-        results_df = results_df[~((results_df['年化收益率(%)'] < 2) | (results_df['Martin Ratio'] < 2))]
+        results_df = results_df[
+            (results_df['年化收益率(%)'] >= 3.5) & 
+            (results_df['年化收益率(%)'] <= 10) & 
+            (results_df['Martin Ratio'] >= 3.5)
+        ]
 
     # 将结果合并到原数据中，使用内连接只保留匹配的行
     merged_df = pd.merge(fund_codes_df, results_df, left_on=fund_codes_df.columns[0], right_on='基金代码', how='inner')
